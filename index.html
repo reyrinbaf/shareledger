@@ -1,0 +1,2741 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShareLedger — Case Study</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --white: #ffffff;
+      --ink: #111111;
+      --mid: #444444;
+      --soft: #888888;
+      --rule: #e5e5e5;
+      --bg: #f7f7f7;
+      --accent: #2563EB;
+      --accent-tint: #eff6ff;
+      --green: #16a34a;
+      --green-tint: #f0fdf4;
+      --red: #dc2626;
+      --red-tint: #fef2f2;
+      --amber: #d97706;
+      --amber-tint: #fffbeb;
+
+      --col-left: 220px;
+      --gap: 80px;
+      --max: 1100px;
+      --pad: 48px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.75;
+      font-weight: 300;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 var(--pad);
+      background: rgba(255, 255, 255, 0);
+      transition: background 0.25s, border-color 0.25s;
+      border-bottom: 1px solid transparent;
+    }
+
+    nav.scrolled {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom-color: var(--rule);
+    }
+
+    .nav-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-back {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--soft);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-back:hover {
+      color: var(--ink);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--soft);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--ink);
+    }
+
+    /* ── Progress ── */
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: var(--ink);
+      z-index: 200;
+      transition: width 0.08s linear;
+      width: 0%;
+    }
+
+    /* ── Wrap ── */
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 var(--pad);
+    }
+
+    /* ── Editorial grid ── */
+    .editorial {
+      display: grid;
+      grid-template-columns: var(--col-left) 1fr;
+      gap: 0 var(--gap);
+      padding: 80px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .editorial:last-child {
+      border-bottom: none;
+    }
+
+    .ed-left {
+      padding-top: 4px;
+    }
+
+    .section-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--soft);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: clamp(16px, 2vw, 20px);
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+
+    .ed-right {}
+
+    /* ── Hero ── */
+    .hero {
+      padding: 120px 0px 0px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .breadcrumb {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--soft);
+      letter-spacing: 0.04em;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp 0.5s 0s ease forwards;
+    }
+
+    .breadcrumb a {
+      color: var(--soft);
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--ink);
+    }
+
+    .breadcrumb .sep {
+      color: var(--rule);
+    }
+
+    .breadcrumb .cur {
+      color: var(--ink);
+      font-weight: 400;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 20px;
+      max-width: 760px;
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--mid);
+      max-width: 620px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .meta-cell {
+      padding: 20px 24px;
+      border-right: 1px solid var(--rule);
+    }
+
+    .meta-cell:first-child {
+      padding-left: 0;
+    }
+
+    .meta-cell:last-child {
+      border-right: none;
+    }
+
+    .meta-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--soft);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .meta-value {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    /* ── Typography ── */
+    h2 {
+      font-size: clamp(20px, 3vw, 30px);
+      font-weight: 400;
+      line-height: 1.15;
+      letter-spacing: -0.015em;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 10px;
+      letter-spacing: 0;
+    }
+
+    p {
+      color: var(--mid);
+      margin-bottom: 14px;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* ── Callout ── */
+    .callout {
+      border-left: 2px solid var(--ink);
+      padding: 14px 18px;
+      background: var(--bg);
+      margin: 24px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .callout p {
+      font-size: 14px;
+      font-style: italic;
+      color: var(--ink);
+      margin-bottom: 0;
+      line-height: 1.65;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--rule);
+      margin: 40px 0;
+    }
+
+    /* ── Before / After ── */
+    .ba {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 28px 0;
+    }
+
+    .ba-col {}
+
+    .ba-col--before {
+      background: var(--white);
+    }
+
+    .ba-col--after {
+      background: var(--bg);
+    }
+
+    .ba-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ba-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .ba-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--soft);
+    }
+
+    .ba-col--after .ba-label {
+      color: var(--green);
+    }
+
+    .ba-items {
+      padding: 4px 0;
+    }
+
+    .ba-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--rule);
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.5;
+    }
+
+    .ba-item:last-child {
+      border-bottom: none;
+    }
+
+    .ba-item::before {
+      content: '—';
+      color: #ccc;
+      font-size: 12px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .ba-col--after .ba-item::before {
+      content: '✓';
+      color: var(--green);
+    }
+
+    /* ── Stat callout ── */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      margin: 28px 0;
+    }
+
+    .stat-cell {
+      padding: 24px;
+      border-right: 1px solid var(--rule);
+      text-align: center;
+    }
+
+    .stat-cell:last-child {
+      border-right: none;
+    }
+
+    .stat-num {
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--soft);
+    }
+
+    /* ── Blockquote ── */
+    blockquote {
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      padding: 24px 0;
+      margin: 24px 0;
+      font-size: clamp(15px, 2vw, 18px);
+      font-weight: 400;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      line-height: 1.5;
+    }
+
+    blockquote cite {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--soft);
+      margin-top: 10px;
+      font-style: normal;
+    }
+
+    /* ── Insight / HMW list ── */
+    .item-list {
+      border-top: 1px solid var(--rule);
+      margin: 24px 0;
+    }
+
+    .item-row {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--rule);
+      padding: 14px 0;
+    }
+
+    .item-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--soft);
+      width: 32px;
+      flex-shrink: 0;
+      padding-top: 1px;
+    }
+
+    .item-text {
+      font-size: 14px;
+      color: var(--mid);
+      line-height: 1.65;
+    }
+
+    .item-text strong {
+      color: var(--ink);
+    }
+
+    /* ── HMW card ── */
+    .hmw-list {
+      margin: 28px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .hmw-item {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--rule);
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 0 24px;
+      align-items: start;
+    }
+
+    .hmw-item:last-child {
+      border-bottom: none;
+    }
+
+    .hmw-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding-top: 2px;
+    }
+
+    .hmw-q {
+      font-size: 14px;
+      color: var(--mid);
+      line-height: 1.6;
+    }
+
+    .hmw-q strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .hmw-constraint {
+      font-size: 14px;
+      color: var(--soft);
+      line-height: 1.6;
+    }
+
+    /* ── Phase / decision block ── */
+    .phase-block {
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 24px 0;
+    }
+
+    .phase-tag-bar {
+      background: var(--ink);
+      color: white;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .phase-tag-bar span {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .phase-chip {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 2px 10px;
+      border-radius: 2px;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+    }
+
+    .phase-body {
+      padding: 20px 22px;
+    }
+
+    .phase-body p {
+      font-size: 14px;
+      color: var(--mid);
+      margin-bottom: 10px;
+    }
+
+    .phase-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ── Decision log ── */
+    .decision-log {
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 24px 0;
+    }
+
+    .dl-head {
+      display: grid;
+      grid-template-columns: 1.4fr 1.6fr 1.8fr;
+      background: var(--bg);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .dl-head-cell {
+      padding: 10px 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--soft);
+      border-right: 1px solid var(--rule);
+    }
+
+    .dl-head-cell:last-child {
+      border-right: none;
+    }
+
+    .dl-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1.6fr 1.8fr;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .dl-row:last-child {
+      border-bottom: none;
+    }
+
+    .dl-cell {
+      padding: 14px 14px;
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.6;
+      border-right: 1px solid var(--rule);
+      vertical-align: top;
+    }
+
+    .dl-cell:last-child {
+      border-right: none;
+    }
+
+    .dl-cell strong {
+      color: var(--ink);
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    /* ── Badge ── */
+    .badge {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 2px;
+      vertical-align: middle;
+    }
+
+    .badge-blue {
+      background: #e8f0fe;
+      color: #1a56a3;
+    }
+
+    .badge-green {
+      background: #e8f5ec;
+      color: #1a6b3c;
+    }
+
+    .badge-amber {
+      background: #fef9e7;
+      color: #9a6900;
+    }
+
+    .badge-red {
+      background: #fef0ec;
+      color: #b83018;
+    }
+
+    .badge-gray {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    /* ── JTBD / flow row ── */
+    .flow-list {
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 24px 0;
+    }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .flow-row:last-child {
+      border-bottom: none;
+    }
+
+    .flow-label {
+      padding: 16px 14px;
+      background: var(--bg);
+      border-right: 1px solid var(--rule);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--soft);
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .flow-content {
+      padding: 16px 14px;
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.6;
+    }
+
+    .flow-content strong {
+      color: var(--ink);
+    }
+
+    /* ── Scope table ── */
+    .scope-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--rule);
+      margin: 24px 0;
+    }
+
+    .scope-table thead {
+      background: var(--bg);
+    }
+
+    .scope-table th {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--soft);
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--rule);
+      border-right: 1px solid var(--rule);
+      font-weight: 400;
+    }
+
+    .scope-table th:last-child {
+      border-right: none;
+    }
+
+    .scope-table td {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--mid);
+      border-bottom: 1px solid var(--rule);
+      border-right: 1px solid var(--rule);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .scope-table td:last-child {
+      border-right: none;
+    }
+
+    .scope-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .scope-table td strong {
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    /* ── Edge case ── */
+    .ec-list {
+      margin: 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .ec-item {
+      border-bottom: 1px solid var(--rule);
+      padding: 22px 22px;
+    }
+
+    .ec-item:last-child {
+      border-bottom: none;
+    }
+
+    .ec-header {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .ec-icon {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .ec-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .ec-scenario {
+      font-size: 13px;
+      color: var(--soft);
+      line-height: 1.55;
+      margin-bottom: 0;
+    }
+
+    .ec-resolution {
+      background: var(--green-tint);
+      border: 1px solid rgba(22, 163, 74, 0.2);
+      border-radius: 4px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #166534;
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    /* ── Discovery entries ── */
+    .disc-list {
+      margin: 24px 0;
+      border-top: 1px solid var(--rule);
+    }
+
+    .disc-item {
+      display: flex;
+      gap: 16px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--rule);
+      align-items: flex-start;
+    }
+
+    .disc-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+
+    .disc-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .disc-body {
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    /* ── KPI grid ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      margin: 28px 0;
+    }
+
+    .kpi-card {
+      background: var(--white);
+      padding: 24px;
+    }
+
+    .kpi-val {
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: var(--soft);
+      line-height: 1.5;
+    }
+
+    /* ── Reflection grid ── */
+    .ref-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      margin: 24px 0;
+    }
+
+    .ref-card {
+      background: var(--white);
+      padding: 24px 22px;
+    }
+
+    .ref-icon {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .ref-card h3 {
+      margin-bottom: 8px;
+    }
+
+    .ref-card p {
+      font-size: 13px;
+      color: var(--mid);
+      margin-bottom: 0;
+      line-height: 1.65;
+    }
+
+    /* ── Persona/pain cards ── */
+    .persona-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      margin: 24px 0;
+    }
+
+    .persona-card {
+      background: var(--white);
+      padding: 22px;
+      transition: background 0.15s;
+    }
+
+    .persona-card:hover {
+      background: var(--bg);
+    }
+
+    .persona-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .persona-card h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .persona-card p {
+      font-size: 13px;
+      color: var(--soft);
+      margin-bottom: 0;
+      line-height: 1.6;
+    }
+
+    /* ── Risk cards ── */
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      margin: 24px 0;
+    }
+
+    .risk-card {
+      background: var(--white);
+      padding: 22px;
+    }
+
+    .risk-card .risk-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .risk-card .risk-scenario {
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .risk-divider {
+      border: none;
+      border-top: 1px dashed var(--rule);
+      margin: 12px 0;
+    }
+
+    .risk-card .risk-fix {
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.6;
+      margin-bottom: 0;
+    }
+
+    /* ── Pull quote ── */
+    .pull-quote {
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      padding: 28px 0;
+      margin: 32px 0;
+      font-size: clamp(16px, 2vw, 20px);
+      font-weight: 400;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      line-height: 1.45;
+    }
+
+    /* ── Two col ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin: 24px 0;
+      align-items: start;
+    }
+
+    /* ── HMW section header ── */
+    .hmw-section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 0;
+    }
+
+    .hmw-section-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--soft);
+      width: 32px;
+      flex-shrink: 0;
+    }
+
+    .hmw-section-title {
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Sub-section label ── */
+    .sub-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--soft);
+      display: block;
+      margin-bottom: 14px;
+      margin-top: 32px;
+    }
+
+    .sub-label:first-child {
+      margin-top: 0;
+    }
+
+    /* ── Story dark card ── */
+    .story-dark {
+      background: var(--ink);
+      color: white;
+      padding: 36px 40px;
+      border-radius: 2px;
+      margin: 28px 0;
+    }
+
+    .story-dark p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      line-height: 1.75;
+      margin-bottom: 10px;
+    }
+
+    .story-dark p:last-child {
+      margin-bottom: 0;
+    }
+
+    .story-dark strong {
+      color: white;
+      font-weight: 500;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 48px var(--pad);
+      border-top: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-left {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--soft);
+    }
+
+    .footer-right {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--soft);
+    }
+
+    /* ── Scroll reveal ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    .d1 {
+      transition-delay: 0.08s;
+    }
+
+    .d2 {
+      transition-delay: 0.16s;
+    }
+
+    .d3 {
+      transition-delay: 0.24s;
+    }
+
+    /* ── fadeUp keyframe (breadcrumb & h1 animation) ── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* ── Figma link ── */
+    .figma-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      text-decoration: none;
+      padding: 10px 16px;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      margin: 20px 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .figma-link:hover {
+      background: var(--bg);
+      border-color: var(--ink);
+    }
+
+    .figma-link svg {
+      flex-shrink: 0;
+    }
+
+    .figma-links-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .figma-links-row .figma-link {
+      margin: 0;
+    }
+
+    /* ── Decision log header bar ── */
+    .dl-header {
+      background: var(--bg);
+      padding: 9px 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--soft);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    /* ── Pull quote with attribution ── */
+    .pull-quote p {
+      font-size: clamp(15px, 2vw, 20px);
+      font-weight: 400;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      line-height: 1.45;
+      margin: 0 0 10px;
+    }
+
+    .pull-quote .attr {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--soft);
+    }
+
+    /* ── Learning cards (reflection) ── */
+    .learnings {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      margin: 24px 0;
+    }
+
+    .learning-card {
+      background: var(--white);
+      padding: 24px 22px;
+      transition: background 0.15s;
+      cursor: default;
+    }
+
+    .learning-card:hover {
+      background: var(--bg);
+    }
+
+    .learning-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--soft);
+      margin-bottom: 8px;
+    }
+
+    .learning-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .learning-card p {
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* ── Image lightbox ── */
+    .cs-figure {
+      margin: 28px 0;
+    }
+
+    .cs-figure:first-child {
+      margin-top: 0;
+    }
+
+    .cs-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      background: var(--bg);
+    }
+
+    .cs-figure .cs-cap {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--soft);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    .cs-figure--zoomable {
+      position: relative;
+      cursor: zoom-in;
+    }
+
+    .cs-figure--zoomable .cs-img {
+      transition: opacity 0.25s ease;
+    }
+
+    .cs-figure--zoomable:hover .cs-img {
+      opacity: 0.92;
+    }
+
+    .cs-figure__expand {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 2;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--ink);
+      cursor: zoom-in;
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 0.25s ease, transform 0.25s ease, background 0.2s ease;
+    }
+
+    .cs-figure--zoomable:hover .cs-figure__expand,
+    .cs-figure--zoomable:focus-within .cs-figure__expand {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .cs-figure__expand:hover {
+      background: var(--white);
+    }
+
+    .cs-figure__expand svg {
+      display: block;
+    }
+
+    .img-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    .img-lightbox.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .img-lightbox__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(17, 17, 17, 0.88);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+
+    .img-lightbox.is-open .img-lightbox__backdrop {
+      opacity: 1;
+    }
+
+    .img-lightbox__panel {
+      position: relative;
+      z-index: 1;
+      max-width: min(96vw, 1400px);
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: scale(0.94) translateY(12px);
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+    }
+
+    .img-lightbox.is-open .img-lightbox__panel {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    .img-lightbox__close {
+      position: absolute;
+      top: -48px;
+      right: 0;
+      z-index: 2;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--white);
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .img-lightbox__close:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .img-lightbox__close svg {
+      display: block;
+    }
+
+    .img-lightbox__img {
+      display: block;
+      max-width: 100%;
+      max-height: calc(92vh - 56px);
+      width: auto;
+      height: auto;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 2px;
+      background: var(--white);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    .img-lightbox__cap {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.65);
+      margin-top: 14px;
+      text-align: center;
+      line-height: 1.5;
+      max-width: 720px;
+    }
+
+    @media (max-width: 640px) {
+      .cs-figure__expand {
+        opacity: 1;
+        transform: scale(1);
+        top: 8px;
+        right: 8px;
+      }
+
+      .img-lightbox {
+        padding: 16px;
+      }
+
+      .img-lightbox__close {
+        top: -44px;
+      }
+
+      .img-lightbox__img {
+        max-height: calc(92vh - 72px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .cs-figure--zoomable .cs-img,
+      .cs-figure__expand,
+      .img-lightbox,
+      .img-lightbox__backdrop,
+      .img-lightbox__panel {
+        transition: none;
+      }
+    }
+
+    /* ── Accordion steps ── */
+    .steps {
+      margin: 20px 0;
+      border-top: 1px solid var(--rule);
+    }
+
+    .step {
+      border-bottom: 1px solid var(--rule);
+      cursor: pointer;
+    }
+
+    .step-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 15px 0;
+      user-select: none;
+    }
+
+    .step-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--soft);
+      width: 22px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .step-title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    .step-plus {
+      font-size: 16px;
+      color: var(--soft);
+      transition: transform 0.25s;
+      line-height: 1;
+    }
+
+    .step.open .step-plus {
+      transform: rotate(45deg);
+    }
+
+    .step-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+      padding-left: 36px;
+    }
+
+    .step.open .step-body {
+      max-height: 500px;
+    }
+
+    .step-body p {
+      font-size: 13px;
+      color: var(--soft);
+      padding-bottom: 14px;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      :root {
+        --col-left: 160px;
+        --gap: 48px;
+        --pad: 32px;
+      }
+
+      .meta-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .stat-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      :root {
+        --pad: 20px;
+      }
+
+      nav {
+        padding: 0 20px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .editorial {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 48px 0;
+      }
+
+      .ed-left {
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+      }
+
+      .section-title {
+        font-size: 14px;
+      }
+
+      .meta-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .ba {
+        grid-template-columns: 1fr;
+      }
+
+      .two-col,
+      .persona-grid,
+      .ref-grid,
+      .learnings,
+      .hmw-grid,
+      .dl-head,
+      .dl-row {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .risk-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-row {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-row {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-label {
+        border-right: none;
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .hmw-item {
+        grid-template-columns: 1fr;
+      }
+
+      .hmw-constraint {
+        grid-column: 1;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="progress" id="progress"></div>
+
+  <nav id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-back">← All work</a>
+      <ul class="nav-links">
+        <li><a href="#context">Context</a></li>
+        <li><a href="#research">Research</a></li>
+        <li><a href="#insights">Insights</a></li>
+        <li><a href="#hmw-a">HMW</a></li>
+        <li><a href="#discovery">Discovery</a></li>
+        <li><a href="#impact">Impact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div class="wrap">
+      <div class="breadcrumb">
+        <a href="#">All work</a>
+        <span class="sep">/</span>
+        <span class="cur">ShareLedger</span>
+        <span class="sep">·</span>
+        <span>10 min read</span>
+      </div>
+      <h1 class="reveal d1">One ledger for both sides of every B2B transaction</h1>
+      <p class="hero-sub reveal d2">Indian MSMEs keep two separate ledgers for every supplier-buyer relationship. Both
+        are "correct." Neither matches. I designed a shared, real-time ledger that removes the reconciliation call from
+        the equation entirely.</p>
+      <div class="meta-grid reveal d3">
+        <div class="meta-cell">
+          <span class="meta-label">Role</span>
+          <span class="meta-value">Product Designer</span>
+        </div>
+        <div class="meta-cell">
+          <span class="meta-label">Tools</span>
+          <span class="meta-value">Android · Web</span>
+        </div>
+        <div class="meta-cell">
+          <span class="meta-label">Timeline</span>
+          <span class="meta-value">2 month</span>
+        </div>
+        <div class="meta-cell">
+          <span class="meta-label">Team</span>
+          <span class="meta-value">PM ×2, Design ×1, Eng</span>
+        </div>
+      </div>
+      <!-- <div class="figma-links-row reveal">
+        <a class="figma-link" href="#"
+          target="_blank" rel="noopener noreferrer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M8 24a4 4 0 004-4v-4H8a4 4 0 000 8zm0-10h4V8H8a4 4 0 100 8h4v-4H8V14zm10-2h-4v4h4a4 4 0 000-8zm-4-2h4a4 4 0 000-8h-4v8zM8 2a4 4 0 000 8h4V2H8z" />
+          </svg>
+          View designs in Figma →
+        </a>
+      </div> -->
+    </div>
+  </div>
+
+  <div class="hero-ph">
+    <div class="ph-inner">
+      <figure class="cs-figure">
+        <img class="cs-img" src="images/hero-image.png"
+          alt="Phase III agentic workspace — full dashboard overview with sidebar Space navigation">
+      </figure>
+    </div>
+  </div>
+
+  <!-- ── 01 Context & Problem ── -->
+  <section id="context">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">01</span>
+          <span class="section-title">Context &amp; Problem</span>
+        </div>
+        <div class="ed-right">
+          <h2>Two "correct" ledgers. Zero trust.</h2>
+          <p>Every B2B transaction in India's MSME market gets recorded twice. The supplier logs it their way. The buyer
+            logs it their way. The numbers almost never match — not because anyone is lying, but because they're working
+            from different information at different times.</p>
+          <p>Suppliers were chasing buyers for payment confirmations that should have been automatic. Buyers were
+            re-typing data
+            their supplier had already entered on the other side of the same transaction.</p>
+
+
+          <div class="ba reveal">
+            <div class="ba-col ba-col--before">
+              <div class="ba-header">
+                <div class="ba-dot" style="background:#ccc;"></div>
+                <span class="ba-label">Before</span>
+              </div>
+              <div class="ba-items">
+                <div class="ba-item">Seller &amp; buyer maintain private, siloed ledgers</div>
+                <div class="ba-item">Both claim to be "correct" — balances never match</div>
+                <div class="ba-item">WhatsApp screenshots become the source of truth</div>
+                <div class="ba-item">Buyers re-enter 30–45 min/month of purchase data</div>
+              </div>
+            </div>
+            <div class="ba-col ba-col--after">
+              <div class="ba-header">
+                <div class="ba-dot" style="background:var(--green);"></div>
+                <span class="ba-label">After</span>
+              </div>
+              <div class="ba-items">
+                <div class="ba-item">One shared ledger — real-time, visible to both</div>
+                <div class="ba-item">Invoices &amp; payments mirror automatically across both books</div>
+                <div class="ba-item">Both parties see the same outstanding <br>balance</div>
+                <div class="ba-item">One tap converts a shared invoice into a purchase bill</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-row reveal">
+            <div class="stat-cell">
+              <span class="stat-num">8–10×</span>
+              <span class="stat-label">More sales invoices than purchase bills on platform</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-num">591K+</span>
+              <span class="stat-label">Eligible ledger pairs es</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-num">30–45m</span>
+              <span class="stat-label">Manual reconciliation time per supplier per month</span>
+            </div>
+          </div>
+
+          <!-- <div class="story-dark reveal">
+            <p><strong>A Tuesday for Ramesh &amp; Aakash.</strong></p>
+            <p>Ramesh runs a retail shop in Old Delhi. Aakash is his distributor in Northeast Delhi. Aakash creates an
+              invoice, sends it on WhatsApp. Ramesh types it into his own ledger — slightly different totals because he
+              missed a line item. A week later, payment is due. Aakash calls. They compare screenshots. Forty minutes
+              pass. Nothing is resolved.</p>
+            <p>With ShareLedger: Aakash creates the invoice. Ramesh sees it immediately — same numbers, no typing. He
+              taps "Convert to Purchase." It's in his books. It's done.</p>
+          </div> -->
+
+          <span class="sub-label reveal">Four pain points that defined the brief</span>
+          <div class="persona-grid reveal">
+            <div class="persona-card">
+              <span class="persona-tag">Buyer · Mismatch Anxiety</span>
+              <h3>My numbers and my supplier's numbers are never the same</h3>
+              <p>Buyers reconcile balances manually every payment cycle. A missed line item or wrong date is all it
+                takes to spark a dispute that neither party can resolve quickly.</p>
+            </div>
+            <div class="persona-card">
+              <span class="persona-tag">Buyer · Double Entry Tax</span>
+              <h3>I'm re-entering data my supplier already entered</h3>
+              <p>Every purchase bill a buyer creates is a duplication of the supplier's sales invoice. Most buyers
+                weren't tracking at all — no digital purchase records whatsoever.</p>
+            </div>
+            <div class="persona-card">
+              <span class="persona-tag">Supplier · Trust Erosion</span>
+              <h3>Buyers won't believe me until I send a screenshot</h3>
+              <p>WhatsApp screenshots had become the de facto source of truth — fragile, informal, and impossible to
+                audit. No formal record existed outside each party's own ledger.</p>
+            </div>
+            <div class="persona-card">
+              <span class="persona-tag">Supplier · Invisible Acknowledgement</span>
+              <h3>I don't know if my buyer even saw the invoice</h3>
+              <p>Suppliers create invoices and send them — but have no signal that the buyer acknowledged them. Payment
+                delays often started not with disputes, but with the buyer simply not having the invoice.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 02 Research ── -->
+  <section id="research">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">02</span>
+          <span class="section-title">Research</span>
+        </div>
+        <div class="ed-right">
+          <h2>What we found when we looked closely</h2>
+          <p>We ran research in three directions: internal stakeholder interviews with product, CS, and sales; 12
+            customer interviews split between buyers and sellers; and a six-month support ticket analysis.</p>
+
+          <span class="sub-label reveal">CS team &amp; internal stakeholders</span>
+          <blockquote class="reveal">
+            "Suppliers are losing salesman time to retailers constantly asking for bills at payment time. They want the
+            buyer to already know what's expected before goods even ship."
+            <cite>CS Lead, MyBillBook</cite>
+          </blockquote>
+          <blockquote class="reveal">
+            "Before shipment arrives, suppliers want buyers to already know what's expected. Right now that information
+            travels by phone call or WhatsApp — no verified record on either side."
+            <cite>Sales Team Interview</cite>
+          </blockquote>
+
+          <div class="callout reveal">
+            <p>The pattern underneath both signals: the ledger problem was really a <strong>communication
+                problem</strong>. Every reconciliation call was a result of information arriving too late, to the wrong
+              person, in the wrong format. Fixing the ledger without fixing the communication wouldn't be enough.</p>
+          </div>
+
+          <span class="sub-label reveal">Customer interviews · 12 users</span>
+          <blockquote class="reveal">
+            "I work with paper bills. If I could see my supplier's entries directly, I wouldn't need to hire someone for
+            my monthly purchase entry."
+            <cite>Non-GST Retailer, Pune</cite>
+          </blockquote>
+          <blockquote class="reveal">
+            "I already trust MyBillBook for my own books. If my supplier was on it too, I wouldn't need the hard copy. I
+            could just verify from the app."
+            <cite>GST Merchant, Mumbai</cite>
+          </blockquote>
+          <blockquote class="reveal">
+            "I don't enter items with the same name my supplier uses — I use my own naming. But I'd still want to see
+            the original invoice to check if everything lines up."
+            <cite>Distributor, Ahmedabad</cite>
+          </blockquote>
+
+          <div class="pull-quote reveal">
+            <p style="color: var(--accent)">8–10× more sales invoices than purchase bills — buyers weren't recording
+              purchases digitally at all. A
+              shared ledger wouldn't just reduce friction; it could close a gap that was invisible from the supplier
+              side.</p>
+            <div class="attr">Key finding · Support ticket analysis</div>
+          </div>
+
+          <span class="sub-label reveal">Support ticket patterns · 6 months</span>
+          <div class="item-list reveal">
+            <div class="item-row">
+              <span class="item-num">01</span>
+              <span class="item-text">Ledger balance disputes were the <strong>#1 reason</strong> buyers and suppliers
+                contacted support together — always rooted in manual entry discrepancies between the two sides</span>
+            </div>
+            <div class="item-row">
+              <span class="item-num">02</span>
+              <span class="item-text">GST merchants kept purchase records for compliance. <strong>Non-GST merchants
+                  relied on physical ledgers</strong> and paper bills — no digital paper trail whatsoever</span>
+            </div>
+            <div class="item-row">
+              <span class="item-num">03</span>
+              <span class="item-text"><strong>Phone number changes by either party</strong> were causing silent ledger
+                mismatches — the link would break invisibly, leading to disputes weeks later with no clear cause</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 03 Insights ── -->
+  <section id="insights">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">03</span>
+          <span class="section-title">Insights from research</span>
+        </div>
+        <div class="ed-right">
+          <h2>What we acted on and How</h2>
+          <!-- <p>Research surfaced six meaningful directions. We picked four for v1. Two were real — just not for the MVP.
+            Here's the full set and the reasoning behind the cuts.</p> -->
+
+          <span class="sub-label reveal">Insights we acted on</span>
+          <div class="item-list reveal">
+            <div class="item-row">
+              <span class="item-num">A</span>
+              <span class="item-text"><strong>Match by mobile number</strong> — Phone numbers are how they know each
+                other. Auto-pairing on login
+                with zero setup from either party.</span>
+            </div>
+            <div class="item-row">
+              <span class="item-num">B</span>
+              <span class="item-text"><strong>Read-only is default</strong> — suppliers need to trust that
+                the ledger is shared with everyone by default, but what if I want to hide it from a few?
+
+            </div>
+            <div class="item-row">
+              <span class="item-num">C</span>
+              <span class="item-text"><strong>One-tap "Convert to Purchase" - removes manual friction</strong>
+                — buyers shouldn't re-enter what the supplier already entered. Item name mismatches are a mapping
+                problem, not a blocker. Solve the re-entry problem first.</span>
+            </div>
+            <div class="item-row">
+              <span class="item-num">D</span>
+              <span class="item-text"><strong>Discovery must be in-context</strong> — a standalone section would be
+                ignored. Entry points needed to live inside the Parties screen where the relationship already existed —
+                and trigger at the moment the user felt the pain.</span>
+            </div>
+          </div>
+
+          <!-- <span class="sub-label reveal">Insights we deferred — and why</span>
+          <div class="item-list reveal">
+            <div class="item-row">
+              <span class="item-num">E</span>
+              <span class="item-text"><strong>In-app messaging between parties</strong> — a real need, surfaced in
+                several interviews. Deferred because it would require a content moderation layer and significantly
+                extends the trust model before we've proven the core ledger loop works. <span
+                  class="badge badge-gray">v2</span></span>
+            </div>
+            <div class="item-row">
+              <span class="item-num">F</span>
+              <span class="item-text"><strong>Unread badges &amp; sort-by-recency on shared ledger cards</strong> —
+                useful for frequent users but adds backend complexity. The first version just needs to prove people will
+                look at the shared ledger at all. Engagement depth comes after breadth. <span
+                  class="badge badge-gray">v2</span></span>
+            </div> -->
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ── 04 HMW A — Auto-pairing ── -->
+  <section id="hmw-a">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">04A</span>
+          <span class="section-title">HMW — Auto-pairing &amp; Shared Access</span>
+        </div>
+        <div class="ed-right">
+          <div class="hmw-list reveal">
+            <div class="hmw-item">
+              <span class="hmw-tag">HMW #1</span>
+              <div>
+                <p class="hmw-q">How might we let suppliers <strong>share their ledger without feeling like they're
+                    giving up control?</strong></p>
+                <p class="hmw-constraint">Constraint: Sharing must be easy to disable per party or globally with a
+                  master switch. Must not require the supplier to do anything special to enable pairing.</p>
+              </div>
+            </div>
+          </div>
+
+          <figure class="cs-figure reveal">
+            <img class="cs-img" src="images/hmw1.png" alt="Legacy Synthesizer — manual node-based IVR flow editor">
+            <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+          </figure>
+
+          <!-- <span class="sub-label reveal">Core UX flows</span> -->
+          <div class="steps reveal">
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num">01</span><span class="step-title">Silent auto-pairing on
+                  login</span><span class="step-plus">+</span></div>
+              <div class="step-body">
+                <p>When a user logs in, the system checks whether any saved party mobile numbers match an existing
+                  MyBillBook account. If they do, a "Shared Books" section surfaces automatically — no invite, no setup.
+                  The user discovers a shared ledger already exists.</p>
+              </div>
+              <div class="step-body">
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/hmw1-core-ux-1.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
+              </div>
+            </div>
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num">02</span><span class="step-title">MBB badge on Parties
+                  screen</span><span class="step-plus">+</span></div>
+              <div class="step-body">
+                <p>Paired accounts display an MBB icon badge. The supplier sees their writable ledger as usual, plus a
+                  visual signal that this ledger is now shared. No data changes, no new screens — just a new layer of
+                  visibility.</p>
+              </div>
+              <div class="step-body">
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/hmw1-core-ux-2.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
+              </div>
+            </div>
+            <!-- <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num">03</span><span class="step-title">Buyer's read-only shared ledger view</span><span class="step-plus">+</span></div>
+              <div class="step-body"><p>The buyer sees the supplier's ledger in a dedicated "Shared Ledger" section — watermarked, no edit buttons, reverse-chronological. The balance shown matches exactly what the supplier sees. Lives separately from buyer's own party list to prevent confusion.</p></div>
+            </div>
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num">04</span><span class="step-title">Permission &amp; privacy controls — granular and bulk</span><span class="step-plus">+</span></div>
+              <div class="step-body"><p>Supplier can toggle sharing per party or globally. When sharing is off, buyer sees "Ledger hidden" — not a blank screen, so they know the relationship still exists. They can contact the supplier directly from that state.</p></div>
+            </div> -->
+          </div>
+
+          <span class="sub-label reveal">Design decisions</span>
+          <div class="decision-log reveal">
+            <div class="dl-head">
+              <div class="dl-head-cell">Decision</div>
+              <div class="dl-head-cell">What we chose</div>
+              <div class="dl-head-cell">What we rejected &amp; why</div>
+            </div>
+            <div class="dl-row">
+              <div class="dl-cell"><strong>Linking mechanism</strong></div>
+              <div class="dl-cell">Mobile number matching. MSMEs know each other by phone — it's the highest-trust.
+              </div>
+              <div class="dl-cell">Company ID or business registration linking. Would
+                require manual setup.</div>
+            </div>
+            <div class="dl-row">
+              <div class="dl-cell"><strong>Sharing default</strong></div>
+              <div class="dl-cell">Opt-out (on by default, easy to disable) at both per-party and global levels.</div>
+              <div class="dl-cell">Opt-in. Would have produced a much smaller initial pool of shared ledgers.</div>
+            </div>
+            <div class="dl-row">
+              <div class="dl-cell"><strong>Shared ledger entry point</strong></div>
+              <div class="dl-cell">ShareLedger on party screen - buyer can't confuse the supplier's ledger with their
+                own.</div>
+              <div class="dl-cell">Will lead to two entries for the same supplier — one the
+                buyer's, one the supplier's — leading confusion.</div>
+            </div>
+          </div>
+
+          <span class="sub-label reveal">Edge cases</span>
+          <div class="steps reveal">
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2" />
+                    <line x1="12" y1="18" x2="12.01" y2="18" />
+                  </svg></span><span class="step-title">Same phone number, two party names (multi-branch
+                  buyer)</span><span class="step-plus">+</span></div>
+              <div class="step-body">
+                <p><strong>Scenario:</strong> A supplier saved the same buyer's number under two different names — two
+                  branches.<br><br><strong>Resolution:</strong> Each record gets its own ledger card. Supplier controls
+                  sharing for each card. On the buyer's side, both cards show under the supplier's name, so it's clear
+                  they're separate accounts.</p>
+
+              </div>
+            </div>
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg></span><span class="step-title">Salesperson login exposes company's shared ledger</span><span
+                  class="step-plus">+</span></div>
+              <div class="step-body">
+                <p><strong>Scenario:</strong>If shared ledgers appeared for salesperson logins,
+                  company financials would be exposed to a limited-access user.<br><br><strong>Resolution:</strong>
+                  Shared Ledger section is hidden entirely for salesperson logins. For buyers who saved a salesperson's
+                  number, the MBB icon still appears on the party card so they know a connection exists — but the shared
+                  ledger shows "Ledger hidden" rather than surfacing financial data to a non-admin.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 04 HMW B — Voucher Conversion ── -->
+  <section id="hmw-b">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">04B</span>
+          <span class="section-title">HMW — Voucher Conversion</span>
+        </div>
+        <div class="ed-right">
+          <div class="hmw-list reveal">
+            <div class="hmw-item">
+              <span class="hmw-tag">HMW #2</span>
+              <div>
+                <p class="hmw-q">How might we <strong>eliminate double-entry for buyers</strong> without requiring them
+                  to set up anything?</p>
+                <p class="hmw-constraint">Constraint: One-tap conversion; item names may differ between buyer and
+                  supplier books — this can't be a blocker.</p>
+              </div>
+            </div>
+          </div>
+
+          <figure class="cs-figure reveal">
+            <img class="cs-img" src="images/hmw2.png" alt="Legacy Synthesizer — manual node-based IVR flow editor">
+            <figcaption class="cs-cap">Every sales invoice in the shared view has a single CTA: "Convert to Purchase."</figcaption>
+          </figure>
+
+          <span class="sub-label reveal">The flow</span>
+          <div class="steps reveal">
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num">01</span><span class="step-title">Trigger</span><span
+                  class="step-plus">+</span></div>
+              <div class="step-body">
+                <p>Every sales invoice in the shared view has a single CTA: <strong>"Convert to Purchase."</strong> It
+                  appears only on invoices — not on payment records, where it would be semantically wrong.</p>
+                  <figure class="cs-figure reveal">
+                    <img class="cs-img" src="images/hmw2-flow-1.png"
+                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                  </figure>
+              </div>
+            </div>
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num">02</span><span class="step-title">Pre-fill Voucher bills</span><span
+                  class="step-plus">+</span></div>
+              <div class="step-body">
+                <p>Tapping pre-fills a purchase bill with matching items, tax, and date from the supplier's invoice.
+                  Where item names match, they auto-map. Mismatches prompt a simple mapping step — not a blocker, not a
+                  modal wall.</p>
+                  <figure class="cs-figure reveal">
+                    <img class="cs-img" src="images/hmw2-flow-2.png"
+                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                  </figure>
+              </div>
+
+            </div>
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num">03</span><span class="step-title">Audit link</span><span
+                  class="step-plus">+</span></div>
+              <div class="step-body">
+                <p>Once converted, the source invoice shows a <strong>"Converted" badge</strong> visible to both
+                  parties. The audit link between source and mirror voucher is preserved permanently — either party can
+                  trace back.</p>
+                  <figure class="cs-figure reveal">
+                    <img class="cs-img" src="images/hmw2-flow-3.png"
+                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                  </figure>
+              </div>
+            </div>
+          </div>
+
+          <span class="sub-label reveal">Edge cases</span>
+          <div class="steps reveal">
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg></span><span class="step-title">Invoice moved to wrong party after conversion</span><span
+                  class="step-plus">+</span></div>
+              <div class="step-body">
+                <p><strong>Scenario:</strong> Supplier realises they issued an invoice to the wrong party and corrects
+                  it. The original buyer has already converted it to a purchase bill. Both parties now have an
+                  inconsistent record pointing.<br><br><strong>Resolution:</strong>
+                  Buyer's converted purchase bill remains in their books under the original party — their record is
+                  valid. Clicking into the linked source invoice shows an explicit error: "Source invoice has been
+                  reassigned.".</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 04 HMW C — Permission Controls ── -->
+  <section id="hmw-c">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">04C</span>
+          <span class="section-title">HMW — Permission &amp; Privacy</span>
+        </div>
+        <div class="ed-right">
+          <div class="hmw-list reveal">
+            <div class="hmw-item">
+              <span class="hmw-tag">HMW #3</span>
+              <div>
+                <p class="hmw-q">How might we give suppliers <strong>granular control over what they share</strong>
+                  without making it feel like a settings maze?</p>
+                <p class="hmw-constraint">Constraint: Two levels — per-party and global. Salesperson login must never
+                  surface the company's shared ledger, even if a buyer saved the salesperson's number.</p>
+              </div>
+            </div>
+          </div>
+
+          <span class="sub-label reveal">Control hierarchy</span>
+          <div class="steps reveal">
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num">01</span><span class="step-title">Per-party</span><span
+                  class="step-plus">+</span></div>
+              <div class="step-body">
+                <p>Toggle in party settings disables sharing for any specific buyer. Buyer sees "Ledger hidden" — not a
+                  blank screen. They know the relationship exists even if the data is gated, and can contact the
+                  supplier directly from that state.</p>
+                  <figure class="cs-figure reveal">
+                    <img class="cs-img" src="images/hmw3-flow-1.png"
+                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                  </figure>
+              </div>
+            </div>
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num">02</span><span class="step-title">Global</span><span
+                  class="step-plus">+</span></div>
+              <div class="step-body">
+                <p>Master switch in global party settings disables sharing for all buyers at once. Useful for businesses
+                  that temporarily want to stop all sharing — without having to toggle each party individually.</p>
+                  <figure class="cs-figure reveal">
+                    <img class="cs-img" src="images/hmw3-flow-2.png"
+                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                  </figure>
+              </div>
+            </div>
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num">03</span><span class="step-title">Role-based</span><span
+                  class="step-plus">+</span></div>
+              <div class="step-body">
+                <p>Salesperson login type: Shared Ledger section hidden entirely. Even if a buyer saved the
+                  salesperson's number, the supplier's financial data is never exposed to a limited-access user.</p>
+                  <figure class="cs-figure reveal">
+                    <img class="cs-img" src="images/hmw3-flow-3.png"
+                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                  </figure>
+              </div>
+            </div>
+          </div>
+
+          <!-- <div class="callout reveal">
+            <p><strong>Why "Ledger hidden" instead of a blank screen:</strong> A blank screen implies the feature is
+              broken or the party doesn't exist. "Ledger hidden" tells the buyer the relationship is real and the
+              supplier has made a deliberate privacy choice — which is far less confusing and far less likely to
+              generate a support ticket.</p>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 04 HMW D — Multi-branch ── -->
+  <section id="hmw-d">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">04D</span>
+          <span class="section-title">HMW — Phone Number &amp; Data Integrity</span>
+        </div>
+        <div class="ed-right">
+          <div class="hmw-list reveal">
+            <div class="hmw-item">
+              <span class="hmw-tag">HMW #4</span>
+              <div>
+                <p class="hmw-q">How might we handle <strong>phone number changes and party deletion</strong> without
+                  silently breaking ledger links?</p>
+                <p class="hmw-constraint">Constraint: Existing converted purchase bills must remain accessible even if
+                  the source relationship changes. History cannot disappear.</p>
+              </div>
+            </div>
+          </div>
+
+          <span class="sub-label reveal">Edge cases — where the real design work was</span>
+          <p class="reveal">This product deals with money and trust. The edge cases aren't edge cases — they're the
+            moments that determine whether users trust the system at all. We designed explicit resolutions for four
+            scenarios that would otherwise become support tickets within the first week of launch.</p>
+
+          <div class="steps reveal">
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10" />
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                  </svg></span><span class="step-title">Phone number change — link must not break silently</span><span
+                  class="step-plus">+</span></div>
+              <div class="step-body">
+                <p><strong>Scenario:</strong> A supplier updates their buyer's stored mobile number. Previously this
+                  would silently sever the ledger link — both parties continue believing the ledger is shared, but it's
+                  actually disconnected. Disputes emerge weeks later with no clear
+                  cause.<br><br><strong>Resolution:</strong> When a number changes, new links are created against the
+                  updated number and old links are archived (not deleted) to preserve voucher history. Existing
+                  converted purchase bills remain accessible. The supplier sees a banner notification confirming the
+                  update. Links broken before this fix surface as "link unavailable" rather than showing wrong data.</p>
+              </div>
+            </div>
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                    <path d="M10 11v6" />
+                    <path d="M14 11v6" />
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                  </svg></span><span class="step-title">Supplier deletes the party — buyer still needs
+                  history</span><span class="step-plus">+</span></div>
+              <div class="step-body">
+                <p><strong>Scenario:</strong> A supplier settles all dues and deletes a buyer from their party list. The
+                  buyer has existing transactions, converted purchase bills, and potential tax obligations tied to those
+                  records — they can't just disappear.<br><br><strong>Resolution:</strong> When a party is deleted, the
+                  buyer's shared ledger view shows "Ledger hidden" rather than vanishing. If the supplier re-adds the
+                  same number later, a new link is created — history is preserved in the buyer's own converted purchase
+                  bills. Supplier's party list stays clean; buyer's records stay intact.</p>
+              </div>
+            </div>
+            <div class="step" onclick="toggleStep(this)">
+              <div class="step-head"><span class="step-num"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18" />
+                    <path d="M2 22h20" />
+                    <path d="M9 8h1" />
+                    <path d="M14 8h1" />
+                    <path d="M9 12h1" />
+                    <path d="M14 12h1" />
+                    <path d="M9 16h6" />
+                  </svg></span><span class="step-title">Multi-branch buyer with same phone number</span><span
+                  class="step-plus">+</span></div>
+              <div class="step-body">
+                <p><strong>Scenario:</strong> A supplier saved the same buyer's mobile number under two different party
+                  names — two branches of the same business. A naive implementation merges them or shows one ledger with
+                  confusingly mixed transactions from both branches.<br><br><strong>Resolution:</strong> Each party
+                  record surfaces as a completely independent ledger card. Supplier can toggle sharing per-card and
+                  track balances separately. On the buyer side, both cards appear in Shared Books with the supplier's
+                  name as the header — making it clear they're looking at two different credit lines from the same
+                  supplier.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- <span class="sub-label reveal">Scope table — what made it in, what didn't</span>
+          <table class="scope-table reveal">
+            <thead>
+              <tr>
+                <th>Epic</th>
+                <th>Description</th>
+                <th>Priority</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>E1 — Auto-pairing</strong></td>
+                <td>Detect mutual party–mobile matches; surface "Shared Books" automatically on login</td>
+                <td><span class="badge badge-red">P0</span></td>
+              </tr>
+              <tr>
+                <td><strong>E2 — Read-only ledgers</strong></td>
+                <td>Render counter-party ledger in read-only; watermarked, no edit buttons, export to PDF/Excel</td>
+                <td><span class="badge badge-red">P0</span></td>
+              </tr>
+              <tr>
+                <td><strong>E4 — Permission toggles</strong></td>
+                <td>Per-party sharing toggle; bulk master switch; salesperson role restrictions</td>
+                <td><span class="badge badge-red">P0</span></td>
+              </tr>
+              <tr>
+                <td><strong>E7 — Edge case handling</strong></td>
+                <td>Phone number change, party deletion/reactivation, multi-business mapping, duplicate numbers</td>
+                <td><span class="badge badge-red">P0</span></td>
+              </tr>
+              <tr>
+                <td><strong>E3 — Voucher conversion</strong></td>
+                <td>One-tap "Convert to Purchase" from shared sales invoice; audit link to source</td>
+                <td><span class="badge badge-amber">P1</span></td>
+              </tr>
+              <tr>
+                <td><strong>E5 — Discovery &amp; Nudges</strong></td>
+                <td>Contextual banner, persistent FAB with NEW badge, WhatsApp invite template</td>
+                <td><span class="badge badge-amber">P1</span></td>
+              </tr>
+              <tr>
+                <td><strong>E8 — Role-based access</strong></td>
+                <td>Salesperson login must never see company's shared ledger; admin has full access</td>
+                <td><span class="badge badge-amber">P1</span></td>
+              </tr>
+              <tr>
+                <td><strong>Unread badges, sort by recency</strong></td>
+                <td>Numeric unread count on shared ledger cards; sorted by most recent transaction</td>
+                <td><span class="badge badge-green">v2</span></td>
+              </tr>
+              <tr>
+                <td><strong>In-app chat, payment gateway</strong></td>
+                <td>Out of scope for v1; deferred to future roadmap</td>
+                <td><span class="badge badge-gray">Deferred</span></td>
+              </tr>
+            </tbody>
+          </table> -->
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+ <!-- ── Risk Area ── -->
+ <section id="hmw-d">
+  <div class="wrap">
+    <div class="editorial reveal">
+      <div class="ed-left">
+        <span class="section-num">Risk Area</span>
+        <span class="section-title">Failure modes we designed for</span>
+      </div>
+
+        <!-- <span class="sub-label reveal">Failure modes we designed for</span> -->
+        <div class="risk-grid reveal">
+          <div class="risk-card">
+            <span class="risk-label">Payment timing</span>
+            <p class="risk-scenario">Buyer records a payment before it clears. Seller sees the entry and assumes money
+              has arrived — and ships the next order against it.</p>
+            <div class="risk-divider"></div>
+            <p class="risk-fix">A <strong>Pending Settlement</strong> status on payment entries with a visible
+              timestamp. The seller knows the payment was logged and knows it hasn't settled — a distinction that
+              matters with credit terms.</p>
+          </div>
+          <div class="risk-card">
+            <span class="risk-label">Off-platform cash</span>
+            <p class="risk-scenario">Cash changes hands. Nobody records it. The shared ledger shows an outstanding
+              balance that both parties know isn't real.</p>
+            <div class="risk-divider"></div>
+            <p class="risk-fix">Manual payment entry with <strong>proof attachment</strong> — a photo of the receipt,
+              a UPI screenshot. Doesn't automate the problem away, but makes resolution fast enough that people will
+              actually do it.</p>
+          </div>
+          <div class="risk-card">
+            <span class="risk-label">Partial adoption</span>
+            <p class="risk-scenario">Supplier is on ShareLedger. Buyer hasn't set it up. The supplier is sharing data
+              into a void — single source of truth is still one-sided.</p>
+            <div class="risk-divider"></div>
+            <p class="risk-fix">The design can't fully solve this — adoption is partly GTM. Our answer:
+              <strong>contextual WhatsApp invite</strong> triggered when the supplier creates a voucher. Nudge arrives
+              with a reason to act, not cold.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+  <!-- ── 05 Discovery ── -->
+  <section id="discovery">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">05</span>
+          <span class="section-title">Discovery</span>
+        </div>
+        <div class="ed-right">
+          <h2>Four entry points, one feature</h2>
+
+          <div class="disc-list reveal">
+            <div class="disc-item">
+              <div class="disc-dot" style="background:var(--accent);"></div>
+              <div>
+                <div class="disc-title">Contextual banner on Parties screen</div>
+                <p class="disc-body">Shows once per device until dismissed. Copy: "Tired of asking for your party's
+                  ledger?" Targets suppliers who already have eligible pairs — the value proposition lands immediately
+                  because they already know the pain. Doesn't appear if user has already enabled the global "stop
+                  sharing" switch.</p>
+
+                  <figure class="cs-figure reveal">
+                    <img class="cs-img" src="images/discovery-1.png"
+                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                  </figure>
+              </div>
+            </div>
+            <div class="disc-item">
+              <div class="disc-dot" style="background:var(--amber);"></div>
+              <div>
+                <div class="disc-title">Persistent FAB with "NEW" badge</div>
+                <p class="disc-body">Floating Action Button remains visible on the Parties tab after the banner is
+                  dismissed. The NEW badge drops after the first interaction. For existing users returning post-release,
+                  this is often the first touchpoint they notice. Removed entirely if user enables the master privacy
+                  switch.</p>
+                  <figure class="cs-figure reveal">
+                    <img class="cs-img" src="images/hmw1-core-ux-1.png"
+                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                  </figure>
+              </div>
+            </div>
+            <div class="disc-item">
+              <div class="disc-dot" style="background:#8b5cf6;"></div>
+              <div>
+                <div class="disc-title">Full-screen onboarding modal on first post-release visit</div>
+                <p class="disc-body">Shown once per device to all users who land on the Parties screen after the feature
+                  ships. Lists the top three benefits in plain language. The CTA — "Explore Shared Ledgers" — deep-links
+                  directly to the FAB list. The modal can be dismissed and doesn't reappear.</p>
+                  <figure class="cs-figure reveal">
+                    <img class="cs-img" src="images/discovery-3.png"
+                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                  </figure>
+              </div>
+            </div>
+            <div class="disc-item">
+              <div class="disc-dot" style="background:#f59e0b;"></div>
+              <div>
+                <div class="disc-title">In-app tutorial video in a bottom sheet</div>
+                <p class="disc-body">Accessible from a help icon on the shared ledger screen. Bottom sheet titled "How
+                  does shared ledger work?" embeds a short explainer video. Includes a direct CS call button and
+                  WhatsApp support chat shortcut — for users who want human help, not a FAQ. Added after CS flagged a
+                  pattern of users discovering the feature and then calling to ask what it meant.</p>
+                  <figure class="cs-figure reveal">
+                    <img class="cs-img" src="images/discovery-5.png"
+                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                  </figure>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 06 Impact ── -->
+  <section id="impact">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">06</span>
+          <span class="section-title">Impact</span>
+        </div>
+        <div class="ed-right">
+          <h2>What success looks like</h2>
+          <p>The feature shipped Android first. The 30-day target is 10% of existing shared ledgers actively
+            viewed at least once a week — conservative given the baseline of 591K already-paired ledgers that existed in
+            the system.</p>
+
+          <div class="kpi-grid reveal">
+            <div class="kpi-card">
+              <span class="kpi-val">591K+</span>
+              <span class="kpi-label">Existing eligible ledger pairs at baseline — the pool we're activating</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-val">10%</span>
+              <span class="kpi-label">Target: active shared ledgers (≥1 view/week) within 30 days of launch</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-val">8–10×</span>
+              <span class="kpi-label">Invoice vs purchase bill gap — the conversion opportunity</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-val">30–45m</span>
+              <span class="kpi-label">Monthly manual reconciliation time per supplier — the target to eliminate</span>
+            </div>
+          </div>
+
+          <span class="sub-label reveal">Network effect via CPP</span>
+          <div class="pull-quote reveal">
+            <p>Every supplier who shares their ledger introduces their buyer to MyBillBook. That buyer sees the product
+              working before they've signed up — with their own data already inside it. It's a quieter acquisition path
+              than paid ads, but the intent is far higher.</p>
+            <div class="attr">Network effect · CPP strategy</div>
+          </div>
+          <p class="reveal">None of the main competitors — Vyapar, Swipe, Zoho, Xero — offer a true two-way shared
+            ledger yet.</p>
+          <p class="reveal">The CPP (Counter-Party Platform) angle is the longer game: the buyer who discovers
+            MyBillBook through a shared ledger is a warmer acquisition than any top-of-funnel marketing. They arrived
+            because the product already had their data.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="img-lightbox" id="imgLightbox" role="dialog" aria-modal="true" aria-hidden="true"
+    aria-label="Enlarged image">
+    <div class="img-lightbox__backdrop" data-lightbox-close></div>
+    <div class="img-lightbox__panel">
+      <button type="button" class="img-lightbox__close" aria-label="Close enlarged image" data-lightbox-close>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+          stroke-linecap="round" aria-hidden="true">
+          <path d="M15 3h6v6" />
+          <path d="M9 3H3v6" />
+          <path d="M21 15v6h-6" />
+          <path d="M3 15v6h6" />
+        </svg>
+      </button>
+      <img class="img-lightbox__img" src="" alt="">
+      <p class="img-lightbox__cap"></p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">Nikhil Tiwari @ 2026</div>
+    <div class="figma-links-row">
+      <a class="figma-link" href="#" target="_blank" rel="noopener noreferrer">
+        ← All work
+      </a>
+    </div>
+  </footer>
+
+  <script>
+    // Progress bar
+    const prog = document.getElementById('progress');
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+      prog.style.width = pct + '%';
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
+    reveals.forEach(el => obs.observe(el));
+
+    // Accordion steps
+    function toggleStep(el) {
+      const open = el.classList.contains('open');
+      document.querySelectorAll('.step.open').forEach(s => s.classList.remove('open'));
+      if (!open) el.classList.add('open');
+    }
+
+    // Image lightbox
+    (function initImageLightbox() {
+      const lightbox = document.getElementById('imgLightbox');
+      if (!lightbox) return;
+      const lightboxImg = lightbox.querySelector('.img-lightbox__img');
+      const lightboxCap = lightbox.querySelector('.img-lightbox__cap');
+      const expandIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M9 3H3v6"/><path d="M15 3h6v6"/><path d="M21 15v6h-6"/><path d="M3 15v6h6"/></svg>';
+      let lastFocus = null;
+
+      function openLightbox(figure) {
+        const img = figure.querySelector('.cs-img');
+        const cap = figure.querySelector('.cs-cap');
+        if (!img) return;
+        lastFocus = document.activeElement;
+        lightboxImg.src = img.currentSrc || img.src;
+        lightboxImg.alt = img.alt;
+        lightboxCap.textContent = cap ? cap.textContent : '';
+        lightboxCap.hidden = !cap;
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => lightbox.classList.add('is-open'));
+        lightbox.querySelector('.img-lightbox__close').focus();
+      }
+
+      function closeLightbox() {
+        if (!lightbox.classList.contains('is-open')) return;
+        lightbox.classList.remove('is-open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        let done = false;
+        const finish = () => {
+          if (done) return; done = true;
+          lightboxImg.removeAttribute('src');
+          if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+        };
+        const onEnd = (e) => {
+          if (e.target !== lightbox || e.propertyName !== 'opacity') return;
+          lightbox.removeEventListener('transitionend', onEnd);
+          finish();
+        };
+        lightbox.addEventListener('transitionend', onEnd);
+        setTimeout(finish, 400);
+      }
+
+      document.querySelectorAll('.cs-figure').forEach((figure) => {
+        const img = figure.querySelector('.cs-img');
+        if (!img) return;
+        figure.classList.add('cs-figure--zoomable');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cs-figure__expand';
+        btn.setAttribute('aria-label', 'Enlarge image');
+        btn.innerHTML = expandIcon;
+        figure.insertBefore(btn, img.nextSibling);
+        const open = (e) => { if (e.target.closest('.cs-cap')) return; e.preventDefault(); openLightbox(figure); };
+        img.addEventListener('click', open);
+        btn.addEventListener('click', open);
+      });
+
+      lightbox.querySelectorAll('[data-lightbox-close]').forEach(el => el.addEventListener('click', closeLightbox));
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+    })();
+  </script>
+</body>
+
+</html>
