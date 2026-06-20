@@ -209,20 +209,20 @@
     }
 
     h1 {
-      font-size: clamp(28px, 4vw, 48px);
+      font-size: clamp(18px, 2.4vw, 28px);
       font-weight: 400;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
+      line-height: 1.35;
+      letter-spacing: -0.005em;
       color: var(--ink);
       margin-bottom: 20px;
-      max-width: 760px;
+      max-width: 100%;
     }
 
     .hero-sub {
       font-size: 16px;
       font-weight: 300;
       color: var(--mid);
-      max-width: 620px;
+      max-width: 100%;
       line-height: 1.7;
       margin-bottom: 48px;
     }
@@ -404,7 +404,6 @@
       grid-template-columns: repeat(3, 1fr);
       border-top: 1px solid var(--rule);
       border-bottom: 1px solid var(--rule);
-      margin: 28px 0;
     }
 
     .stat-cell {
@@ -1583,6 +1582,189 @@
       }
     }
 
+    /* ── Hinglish quotes ── */
+    .hq-list {
+      margin: 24px 0;
+      border-top: 1px solid var(--rule);
+    }
+
+    .hq-item {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .hq-text {
+      font-size: 14px;
+      line-height: 1.85;
+      margin: 0 0 8px;
+      font-style: italic;
+      color: #bbb;
+    }
+
+    .hq-text .hl {
+      color: var(--ink);
+      font-weight: 500;
+      font-style: normal;
+    }
+
+    .hq-en {
+      font-size: 11px;
+      color: #ccc;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ── XY bar chart ── */
+    .xy-chart {
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 28px 0;
+    }
+
+    .xy-header {
+      background: var(--bg);
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .xy-header-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--soft);
+    }
+
+    .xy-header-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      background: var(--accent-tint);
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+
+    .xy-canvas {
+      display: flex;
+      padding: 20px 20px 0;
+      gap: 0;
+    }
+
+    .xy-y {
+      width: 32px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 180px;
+    }
+
+    .xy-y-tick {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      color: #ddd;
+      text-align: right;
+      padding-right: 8px;
+      line-height: 1;
+    }
+
+    .xy-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .xy-plot {
+      height: 180px;
+      position: relative;
+      border-left: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .xy-gridline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      border-top: 1px dashed #f3f3f3;
+    }
+
+    .xy-bars {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 56px;
+    }
+
+    .xy-bar-grp {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      width: 72px;
+      gap: 6px;
+    }
+
+    .xy-bar-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--ink);
+      flex-shrink: 0;
+    }
+
+    .xy-bar {
+      width: 100%;
+      height: 0;
+      border-radius: 2px 2px 0 0;
+      transition: height 1.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .xy-bar--a {
+      background: var(--ink);
+      transition-delay: 0.1s;
+    }
+
+    .xy-bar--b {
+      background: #e5e7eb;
+      transition-delay: 0.2s;
+    }
+
+    .xy-xrow {
+      display: flex;
+      justify-content: center;
+      gap: 56px;
+      padding: 10px 0 20px;
+    }
+
+    .xy-x-lbl {
+      width: 72px;
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--soft);
+      line-height: 1.5;
+    }
+
+    .xy-note {
+      font-size: 12px;
+      color: var(--mid);
+      line-height: 1.6;
+      margin: 0;
+      border-top: 1px solid var(--rule);
+      padding: 14px 20px;
+    }
+
+    .xy-note strong { color: var(--accent); }
+
     @media (max-width: 640px) {
       :root {
         --pad: 20px;
@@ -1692,30 +1874,27 @@
       <div class="breadcrumb">
         <a href="nikhiltiwaridesign.framer.website">All work</a>
         <span class="sep">/</span>
-        <span class="cur">ShareLedger</span>
+        <span class="cur">MyBillBook ShareLedger</span>
         <span class="sep">·</span>
         <span>10 min read</span>
       </div>
-      <h1 class="reveal d1">One ledger for both sides of every B2B transaction</h1>
-      <p class="hero-sub reveal d2">Indian MSMEs keep two separate ledgers for every supplier-buyer relationship. Both
-        are "correct." Neither matches. I designed a shared, real-time ledger that removes the reconciliation call from
-        the equation entirely.</p>
-      <div class="meta-grid reveal d3">
-        <div class="meta-cell">
-          <span class="meta-label">Role</span>
-          <span class="meta-value">Product Designer</span>
+      <h1 class="reveal d1">591K+ business relationships live on MyBillBook. 3/5 had numbers that didn't match. We
+        designed the shared view that made disagreement impossible.</h1>
+      <p class="hero-sub reveal d2">Indian MSMEs maintain two separate records for every supplier-buyer relationship.
+        Both are "correct." Neither matches. We designed a shared, real-time view that makes the reconciliation call
+        obsolete — not by fixing entries, but by eliminating the need to keep two in the first place.</p>
+      <div class="stat-row reveal d3">
+        <div class="stat-cell">
+          <span class="stat-num">591K+</span>
+          <span class="stat-label">Eligible ledger pairs on MyBillBook with no shared view</span>
         </div>
-        <div class="meta-cell">
-          <span class="meta-label">Tools</span>
-          <span class="meta-value">Android · Web</span>
+        <div class="stat-cell">
+          <span class="stat-num">8–10×</span>
+          <span class="stat-label">More sales invoices than purchase bills — buyers weren't recording at all</span>
         </div>
-        <div class="meta-cell">
-          <span class="meta-label">Timeline</span>
-          <span class="meta-value">2 month</span>
-        </div>
-        <div class="meta-cell">
-          <span class="meta-label">Team</span>
-          <span class="meta-value">PM ×2, Design ×1, Eng</span>
+        <div class="stat-cell">
+          <span class="stat-num">30 min → 0</span>
+          <span class="stat-label">Manual reconciliation time per supplier, per month</span>
         </div>
       </div>
       <!-- <div class="figma-links-row reveal">
@@ -1745,18 +1924,27 @@
     <div class="wrap">
       <div class="editorial reveal">
         <div class="ed-left">
-          <span class="section-num">01</span>
-          <span class="section-title">Context &amp; Problem</span>
+          <span class="section-num">Context</span>
+          <span class="section-title">A Tuesday with ShareLedger on MyBillBook</span>
         </div>
         <div class="ed-right">
-          <h2>Two "correct" ledgers. Zero trust.</h2>
-          <p>Every B2B transaction in India's MSME market gets recorded twice. The supplier logs it their way. The buyer
-            logs it their way. The numbers almost never match — not because anyone is lying, but because they're working
-            from different information at different times.</p>
-          <p>Suppliers were chasing buyers for payment confirmations that should have been automatic. Buyers were
-            re-typing data
-            their supplier had already entered on the other side of the same transaction.</p>
+          <p>MyBillBook is a platform where Indian MSMEs manage invoices and GST-compliant records. At the core of
+            every business relationship on the platform is a party ledger — a running record of every transaction,
+            payment, and balance owed between two parties.</p>
 
+          <div class="story-dark reveal">
+            <p><strong>A Tuesday for Ramesh &amp; Aakash.</strong></p>
+            <p>Ramesh runs a retail shop in Old Delhi. Aakash is his distributor in Northeast Delhi. Aakash creates an
+              invoice, sends it on WhatsApp. Ramesh types it into his own ledger — slightly different totals because he
+              missed a line item. A week later, payment is due. Aakash calls. They compare screenshots. Forty minutes
+              pass. Nothing is resolved.</p>
+            <p>With ShareLedger: Aakash creates the invoice. Ramesh sees it immediately — same numbers, no typing. He
+              taps "Convert to Purchase." It's in his books. It's done.</p>
+          </div>
+
+          <p>Here's the thing — when Aakash creates an invoice, Ramesh still has to enter it manually on his end. Same
+            transaction, two people recording it separately, at different times. By the time payment is due, the numbers
+            are almost never the same. Now One of them will spend the next forty minutes on a call trying to reconcile them.  .</p>
 
           <div class="ba reveal">
             <div class="ba-col ba-col--before">
@@ -1779,36 +1967,120 @@
               <div class="ba-items">
                 <div class="ba-item">One shared ledger — real-time, visible to both</div>
                 <div class="ba-item">Invoices &amp; payments mirror automatically across both books</div>
-                <div class="ba-item">Both parties see the same outstanding <br>balance</div>
+                <div class="ba-item">Both parties see the same outstanding balance</div>
                 <div class="ba-item">One tap converts a shared invoice into a purchase bill</div>
               </div>
             </div>
           </div>
 
-          <div class="stat-row reveal">
-            <div class="stat-cell">
-              <span class="stat-num">8–10×</span>
-              <span class="stat-label">More sales invoices than purchase bills on platform</span>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 02 Research ── -->
+  <section id="research">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">Research</span>
+          <span class="section-title">what we found when we looked closely</span>
+        </div>
+        <div class="ed-right">
+          <p>We ran research in two directions: 12 telephony interviews with buyers and sellers, and a six-month
+            support ticket analysis.</p>
+
+          <span class="sub-label reveal">Customer interviews · 12 users</span>
+          <div class="hq-list reveal">
+            <div class="hq-item">
+              <p class="hq-text">"Paper pe kaam karta hoon main. <span class="hl">Agar supplier ka entry seedha dekh sakta</span>, toh <span class="hl">purchase entry ke liye alag aadmi nahi rakhna padta</span>."</p>
+              <p class="hq-en">If I could see my supplier's entries directly, I wouldn't need to hire someone just for monthly purchase entry.</p>
             </div>
-            <div class="stat-cell">
-              <span class="stat-num">591K+</span>
-              <span class="stat-label">Eligible ledger pairs es</span>
+            <div class="hq-item">
+              <p class="hq-text">"Apna hisaab toh MyBillBook pe hi hai. <span class="hl">Agar supplier bhi iske upar hota</span>, <span class="hl">hard copy ki zaroorat hi nahi padti</span> — app se check kar leta."</p>
+              <p class="hq-en">If my supplier were on it too, I wouldn't need a hard copy — I could verify straight from the app.</p>
             </div>
-            <div class="stat-cell">
-              <span class="stat-num">30–45m</span>
-              <span class="stat-label">Manual reconciliation time per supplier per month</span>
+            <div class="hq-item">
+              <p class="hq-text">"Main apne naam se items daalta hoon, supplier ke naam se nahi. <span class="hl">But original invoice toh dekhna hi padta hai</span> — <span class="hl">tabhi pata chalta hai sab theek hua ya nahi</span>."</p>
+              <p class="hq-en">I still have to pull the original invoice to check if everything lines up.</p>
             </div>
           </div>
 
-          <!-- <div class="story-dark reveal">
-            <p><strong>A Tuesday for Ramesh &amp; Aakash.</strong></p>
-            <p>Ramesh runs a retail shop in Old Delhi. Aakash is his distributor in Northeast Delhi. Aakash creates an
-              invoice, sends it on WhatsApp. Ramesh types it into his own ledger — slightly different totals because he
-              missed a line item. A week later, payment is due. Aakash calls. They compare screenshots. Forty minutes
-              pass. Nothing is resolved.</p>
-            <p>With ShareLedger: Aakash creates the invoice. Ramesh sees it immediately — same numbers, no typing. He
-              taps "Convert to Purchase." It's in his books. It's done.</p>
-          </div> -->
+          <div class="xy-chart reveal">
+            <div class="xy-header">
+              <span class="xy-header-label">Key finding · Voucher gap</span>
+              <span class="xy-header-badge">Support ticket analysis · 6 months</span>
+            </div>
+            <div class="xy-canvas">
+              <div class="xy-y">
+                <span class="xy-y-tick">100</span>
+                <span class="xy-y-tick">75</span>
+                <span class="xy-y-tick">50</span>
+                <span class="xy-y-tick">25</span>
+                <span class="xy-y-tick">0</span>
+              </div>
+              <div class="xy-main">
+                <div class="xy-plot">
+                  <div class="xy-gridline" style="top:0%"></div>
+                  <div class="xy-gridline" style="top:25%"></div>
+                  <div class="xy-gridline" style="top:50%"></div>
+                  <div class="xy-gridline" style="top:75%"></div>
+                  <div class="xy-bars">
+                    <div class="xy-bar-grp">
+                      <span class="xy-bar-val">8–10×</span>
+                      <div class="xy-bar xy-bar--a" data-height="90"></div>
+                    </div>
+                    <div class="xy-bar-grp">
+                      <span class="xy-bar-val">1×</span>
+                      <div class="xy-bar xy-bar--b" data-height="9"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="xy-xrow">
+                  <div class="xy-x-lbl">Sales<br>Invoices</div>
+                  <div class="xy-x-lbl">Purchase<br>Bills</div>
+                </div>
+              </div>
+            </div>
+            <p class="xy-note">Buyers weren't recording purchases digitally at all — a gap <strong>invisible from the supplier side.</strong></p>
+          </div>
+
+          <span class="sub-label reveal">Support ticket patterns</span>
+          <div class="item-list reveal">
+            <div class="item-row">
+              <span class="item-num">01</span>
+              <span class="item-text">Ledger balance disputes were the <strong>#1 reason</strong> buyers and suppliers
+                contacted support together — always rooted in manual entry discrepancies between the two sides</span>
+            </div>
+            <div class="item-row">
+              <span class="item-num">02</span>
+              <span class="item-text">GST merchants kept purchase records for compliance. <strong>Non-GST merchants
+                  relied on physical ledgers</strong> — no digital paper trail whatsoever</span>
+            </div>
+            <div class="item-row">
+              <span class="item-num">03</span>
+              <span class="item-text"><strong>Phone number changes</strong> were causing silent ledger mismatches —
+                the link would break invisibly, leading to disputes weeks later with no clear cause</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 03 Insights ── -->
+  <section id="insights">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">03</span>
+          <span class="section-title">Insights from research</span>
+        </div>
+        <div class="ed-right">
+          <h2>What we acted on and How</h2>
+          <!-- <p>Research surfaced six meaningful directions. We picked four for v1. Two were real — just not for the MVP.
+            Here's the full set and the reasoning behind the cuts.</p> -->
 
           <span class="sub-label reveal">Four pain points that defined the brief</span>
           <div class="persona-grid reveal">
@@ -1837,102 +2109,6 @@
                 delays often started not with disputes, but with the buyer simply not having the invoice.</p>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── 02 Research ── -->
-  <section id="research">
-    <div class="wrap">
-      <div class="editorial reveal">
-        <div class="ed-left">
-          <span class="section-num">02</span>
-          <span class="section-title">Research</span>
-        </div>
-        <div class="ed-right">
-          <h2>What we found when we looked closely</h2>
-          <p>We ran research in three directions: internal stakeholder interviews with product, CS, and sales; 12
-            customer interviews split between buyers and sellers; and a six-month support ticket analysis.</p>
-
-          <span class="sub-label reveal">CS team &amp; internal stakeholders</span>
-          <blockquote class="reveal">
-            "Suppliers are losing salesman time to retailers constantly asking for bills at payment time. They want the
-            buyer to already know what's expected before goods even ship."
-            <cite>CS Lead, MyBillBook</cite>
-          </blockquote>
-          <blockquote class="reveal">
-            "Before shipment arrives, suppliers want buyers to already know what's expected. Right now that information
-            travels by phone call or WhatsApp — no verified record on either side."
-            <cite>Sales Team Interview</cite>
-          </blockquote>
-
-          <div class="callout reveal">
-            <p>The pattern underneath both signals: the ledger problem was really a <strong>communication
-                problem</strong>. Every reconciliation call was a result of information arriving too late, to the wrong
-              person, in the wrong format. Fixing the ledger without fixing the communication wouldn't be enough.</p>
-          </div>
-
-          <span class="sub-label reveal">Customer interviews · 12 users</span>
-          <blockquote class="reveal">
-            "I work with paper bills. If I could see my supplier's entries directly, I wouldn't need to hire someone for
-            my monthly purchase entry."
-            <cite>Non-GST Retailer, Pune</cite>
-          </blockquote>
-          <blockquote class="reveal">
-            "I already trust MyBillBook for my own books. If my supplier was on it too, I wouldn't need the hard copy. I
-            could just verify from the app."
-            <cite>GST Merchant, Mumbai</cite>
-          </blockquote>
-          <blockquote class="reveal">
-            "I don't enter items with the same name my supplier uses — I use my own naming. But I'd still want to see
-            the original invoice to check if everything lines up."
-            <cite>Distributor, Ahmedabad</cite>
-          </blockquote>
-
-          <div class="pull-quote reveal">
-            <p style="color: var(--accent)">8–10× more sales invoices than purchase bills — buyers weren't recording
-              purchases digitally at all. A
-              shared ledger wouldn't just reduce friction; it could close a gap that was invisible from the supplier
-              side.</p>
-            <div class="attr">Key finding · Support ticket analysis</div>
-          </div>
-
-          <span class="sub-label reveal">Support ticket patterns · 6 months</span>
-          <div class="item-list reveal">
-            <div class="item-row">
-              <span class="item-num">01</span>
-              <span class="item-text">Ledger balance disputes were the <strong>#1 reason</strong> buyers and suppliers
-                contacted support together — always rooted in manual entry discrepancies between the two sides</span>
-            </div>
-            <div class="item-row">
-              <span class="item-num">02</span>
-              <span class="item-text">GST merchants kept purchase records for compliance. <strong>Non-GST merchants
-                  relied on physical ledgers</strong> and paper bills — no digital paper trail whatsoever</span>
-            </div>
-            <div class="item-row">
-              <span class="item-num">03</span>
-              <span class="item-text"><strong>Phone number changes by either party</strong> were causing silent ledger
-                mismatches — the link would break invisibly, leading to disputes weeks later with no clear cause</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── 03 Insights ── -->
-  <section id="insights">
-    <div class="wrap">
-      <div class="editorial reveal">
-        <div class="ed-left">
-          <span class="section-num">03</span>
-          <span class="section-title">Insights from research</span>
-        </div>
-        <div class="ed-right">
-          <h2>What we acted on and How</h2>
-          <!-- <p>Research surfaced six meaningful directions. We picked four for v1. Two were real — just not for the MVP.
-            Here's the full set and the reasoning behind the cuts.</p> -->
 
           <span class="sub-label reveal">Insights we acted on</span>
           <div class="item-list reveal">
@@ -1983,6 +2159,16 @@
     </div>
     </div>
   </section>
+
+  <div class="hero-ph">
+    <div class="ph-inner">
+      <figure class="cs-figure">
+        <img class="cs-img" src="images/flow-img-1.png"
+          alt="Phase III agentic workspace — full dashboard overview with sidebar Space navigation">
+          <figcaption class="cs-cap">User Flow: Party Detail Page</figcaption>
+        </div>
+        </figure>
+  </div>
 
   <!-- ── 04 HMW A — Auto-pairing ── -->
   <section id="hmw-a">
@@ -2119,6 +2305,16 @@
     </div>
   </section>
 
+  <div class="hero-ph">
+    <div class="ph-inner">
+      <figure class="cs-figure">
+        <img class="cs-img" src="images/flow-img-2.png"
+          alt="Phase III agentic workspace — full dashboard overview with sidebar Space navigation">
+          <figcaption class="cs-cap">User Flow: Convert-to-purchase</figcaption>
+        </div>
+        </figure>
+  </div>
+
   <!-- ── 04 HMW B — Voucher Conversion ── -->
   <section id="hmw-b">
     <div class="wrap">
@@ -2142,7 +2338,8 @@
 
           <figure class="cs-figure reveal">
             <img class="cs-img" src="images/hmw2.png" alt="Legacy Synthesizer — manual node-based IVR flow editor">
-            <figcaption class="cs-cap">Every sales invoice in the shared view has a single CTA: "Convert to Purchase."</figcaption>
+            <figcaption class="cs-cap">Every sales invoice in the shared view has a single CTA: "Convert to Purchase."
+            </figcaption>
           </figure>
 
           <span class="sub-label reveal">The flow</span>
@@ -2153,25 +2350,25 @@
               <div class="step-body">
                 <p>Every sales invoice in the shared view has a single CTA: <strong>"Convert to Purchase."</strong> It
                   appears only on invoices — not on payment records, where it would be semantically wrong.</p>
-                  <figure class="cs-figure reveal">
-                    <img class="cs-img" src="images/hmw2-flow-1.png"
-                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
-                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
-                  </figure>
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/hmw2-flow-1.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
               </div>
             </div>
             <div class="step" onclick="toggleStep(this)">
-              <div class="step-head"><span class="step-num">02</span><span class="step-title">Pre-fill Voucher bills</span><span
-                  class="step-plus">+</span></div>
+              <div class="step-head"><span class="step-num">02</span><span class="step-title">Pre-fill Voucher
+                  bills</span><span class="step-plus">+</span></div>
               <div class="step-body">
                 <p>Tapping pre-fills a purchase bill with matching items, tax, and date from the supplier's invoice.
                   Where item names match, they auto-map. Mismatches prompt a simple mapping step — not a blocker, not a
                   modal wall.</p>
-                  <figure class="cs-figure reveal">
-                    <img class="cs-img" src="images/hmw2-flow-2.png"
-                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
-                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
-                  </figure>
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/hmw2-flow-2.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
               </div>
 
             </div>
@@ -2182,11 +2379,11 @@
                 <p>Once converted, the source invoice shows a <strong>"Converted" badge</strong> visible to both
                   parties. The audit link between source and mirror voucher is preserved permanently — either party can
                   trace back.</p>
-                  <figure class="cs-figure reveal">
-                    <img class="cs-img" src="images/hmw2-flow-3.png"
-                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
-                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
-                  </figure>
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/hmw2-flow-3.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
               </div>
             </div>
           </div>
@@ -2246,11 +2443,11 @@
                 <p>Toggle in party settings disables sharing for any specific buyer. Buyer sees "Ledger hidden" — not a
                   blank screen. They know the relationship exists even if the data is gated, and can contact the
                   supplier directly from that state.</p>
-                  <figure class="cs-figure reveal">
-                    <img class="cs-img" src="images/hmw3-flow-1.png"
-                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
-                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
-                  </figure>
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/hmw3-flow-1.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
               </div>
             </div>
             <div class="step" onclick="toggleStep(this)">
@@ -2259,11 +2456,11 @@
               <div class="step-body">
                 <p>Master switch in global party settings disables sharing for all buyers at once. Useful for businesses
                   that temporarily want to stop all sharing — without having to toggle each party individually.</p>
-                  <figure class="cs-figure reveal">
-                    <img class="cs-img" src="images/hmw3-flow-2.png"
-                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
-                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
-                  </figure>
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/hmw3-flow-2.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
               </div>
             </div>
             <div class="step" onclick="toggleStep(this)">
@@ -2272,11 +2469,11 @@
               <div class="step-body">
                 <p>Salesperson login type: Shared Ledger section hidden entirely. Even if a buyer saved the
                   salesperson's number, the supplier's financial data is never exposed to a limited-access user.</p>
-                  <figure class="cs-figure reveal">
-                    <img class="cs-img" src="images/hmw3-flow-3.png"
-                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
-                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
-                  </figure>
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/hmw3-flow-3.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
               </div>
             </div>
           </div>
@@ -2443,14 +2640,14 @@
   </section>
 
 
- <!-- ── Risk Area ── -->
- <section id="hmw-d">
-  <div class="wrap">
-    <div class="editorial reveal">
-      <div class="ed-left">
-        <span class="section-num">Risk Area</span>
-        <span class="section-title">Failure modes we designed for</span>
-      </div>
+  <!-- ── Risk Area ── -->
+  <section id="hmw-d">
+    <div class="wrap">
+      <div class="editorial reveal">
+        <div class="ed-left">
+          <span class="section-num">Risk Area</span>
+          <span class="section-title">Failure modes we designed for</span>
+        </div>
 
         <!-- <span class="sub-label reveal">Failure modes we designed for</span> -->
         <div class="risk-grid reveal">
@@ -2485,8 +2682,8 @@
         </div>
       </div>
     </div>
-  </div>
-</section>
+    </div>
+  </section>
 
 
   <!-- ── 05 Discovery ── -->
@@ -2510,11 +2707,11 @@
                   because they already know the pain. Doesn't appear if user has already enabled the global "stop
                   sharing" switch.</p>
 
-                  <figure class="cs-figure reveal">
-                    <img class="cs-img" src="images/discovery-1.png"
-                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
-                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
-                  </figure>
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/discovery-1.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
               </div>
             </div>
             <div class="disc-item">
@@ -2525,11 +2722,11 @@
                   dismissed. The NEW badge drops after the first interaction. For existing users returning post-release,
                   this is often the first touchpoint they notice. Removed entirely if user enables the master privacy
                   switch.</p>
-                  <figure class="cs-figure reveal">
-                    <img class="cs-img" src="images/hmw1-core-ux-1.png"
-                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
-                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
-                  </figure>
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/hmw1-core-ux-1.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
               </div>
             </div>
             <div class="disc-item">
@@ -2539,11 +2736,11 @@
                 <p class="disc-body">Shown once per device to all users who land on the Parties screen after the feature
                   ships. Lists the top three benefits in plain language. The CTA — "Explore Shared Ledgers" — deep-links
                   directly to the FAB list. The modal can be dismissed and doesn't reappear.</p>
-                  <figure class="cs-figure reveal">
-                    <img class="cs-img" src="images/discovery-3.png"
-                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
-                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
-                  </figure>
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/discovery-3.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
               </div>
             </div>
             <div class="disc-item">
@@ -2554,11 +2751,11 @@
                   does shared ledger work?" embeds a short explainer video. Includes a direct CS call button and
                   WhatsApp support chat shortcut — for users who want human help, not a FAQ. Added after CS flagged a
                   pattern of users discovering the feature and then calling to ask what it meant.</p>
-                  <figure class="cs-figure reveal">
-                    <img class="cs-img" src="images/discovery-5.png"
-                      alt="Legacy Synthesizer — manual node-based IVR flow editor">
-                    <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
-                  </figure>
+                <figure class="cs-figure reveal">
+                  <img class="cs-img" src="images/discovery-5.png"
+                    alt="Legacy Synthesizer — manual node-based IVR flow editor">
+                  <!-- <figcaption class="cs-cap">Before Vs After</figcaption> -->
+                </figure>
               </div>
             </div>
           </div>
@@ -2665,6 +2862,19 @@
       });
     }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
     reveals.forEach(el => obs.observe(el));
+
+    // XY chart bar animation
+    const chartObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.xy-bar[data-height]').forEach(bar => {
+            bar.style.height = bar.dataset.height + '%';
+          });
+          chartObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.xy-chart').forEach(el => chartObs.observe(el));
 
     // Accordion steps
     function toggleStep(el) {
